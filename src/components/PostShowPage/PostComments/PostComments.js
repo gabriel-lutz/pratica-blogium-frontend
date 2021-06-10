@@ -1,25 +1,18 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
-
+import axios from "axios"
 import Comment from './Comment';
 import AddComment from './AddComment';
 
 export default function PostComments({ postId }) {
   const [comments, setComments] = useState([]);
+  const [refresh, setRefresh] = useState(0)
 
   useEffect(() => {
-    setComments([{
-      id: 1,
-      postId: postId,
-      author: 'João',
-      content: 'Muito bom esse post! Tá de parabéns'
-    }, {
-      id: 2,
-      postId: postId,
-      author: 'Maria',
-      content: 'Como faz pra dar palmas?'
-    }])
-  }, [postId]);
+    const response = axios.get(`http://localhost:4000/posts/${postId}/comments`)
+    response.then(data=>{setComments(data.data)})
+    response.catch(()=>{alert("Houve um erro ao carregar os comentarios do post. Tente novamente")})
+  }, [postId,refresh]);
   
   return (
     <Container>
@@ -29,7 +22,7 @@ export default function PostComments({ postId }) {
          ? comments.map(c => <Comment comment={c} key={c.id} />)
          : "No comments yet. Be the first to comment!"
       }
-      <AddComment postId={postId} />
+      <AddComment postId={postId} refresh={refresh} setRefresh={setRefresh} />
     </Container>
   );
 }
